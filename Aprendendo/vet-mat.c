@@ -21,7 +21,7 @@ void print_matriz_int(int **matriz, int l, int c) {
     for (i = 0; i < l; i++) {
         printf("\t| %2d |", i);
         for (j = 0; j < c; j++) {
-            printf(" %4d |", matriz[i][j]);
+            printf(" %5d |", matriz[i][j]);
         }
         printf("\n");
     } 
@@ -91,8 +91,10 @@ float **aloca_matriz_float(int l, int c) {
 void libera_matriz_float(float **matriz, int l) {
     int i, j;
     for (i = 0; i < l; i++) {
+        matriz[i] = NULL;
         free(matriz[i]);
     }
+    matriz = NULL;
     free(matriz);
 }
 
@@ -103,5 +105,6 @@ int *aloca_vetor_int(int tam) {
 }
 
 void libera_vetor_int(int *vetor) {
+    vetor = NULL;
     free(vetor);
 }

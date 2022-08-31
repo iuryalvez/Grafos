@@ -11,7 +11,9 @@ struct grafo {
 
 typedef struct grafo Grafo;
 
-Grafo *criarGrafo(int n_vertices, int grau_max, int eh_ponderado);
+void menu();
+
+Grafo *criarGrafo();
 
 void liberarGrafo(Grafo *grafo);
 
