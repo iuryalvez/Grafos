@@ -3,12 +3,12 @@
 void print_vetor_int(int *vetor, int tam) {
     int i;
     for (i = 0; i < tam; i++) {
-        if (i == 0) printf("\n\tNos -> %2d", i); 
+        if (i == 0) printf("\n\t   Nos -> %2d", i); 
         else printf(" %2d", i);
     }
     printf("\n\t");
     i = 0;
-    printf("       %2d", vetor[i]);
+    printf("Niveis -> %2d", vetor[i]);
     i++;
     for (; i < tam; i++) {
         printf(" %2d", vetor[i]);

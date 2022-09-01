@@ -39,8 +39,12 @@ int main () {
                         scanf("%f", &peso);
                     }
                     inserirAresta(grafo, orig, dest, ed, peso);
-                    printf("\t1 - Inserir\n\t2 - Parar\n\t");
-                    scanf("%d", &opc);
+                    opc = 0;
+                    while (opc < 1 || opc > 2) {
+                        printf("\t1 - Inserir\n\t2 - Parar\n");
+                        scanf("%d", &opc);
+                        if (opc < 1 || opc > 2) printf("Operacao invalida!\n");
+                    }
                 }
             } else printf("Nao foi criado nenhum grafo!\n");
             break;
@@ -58,8 +62,12 @@ int main () {
                         scanf("%f", &peso);
                     }
                     removerAresta(grafo, orig, dest, ed);
-                    printf("\t1 - Remover\n\t2 - Parar\n");
-                    scanf("%d", &opc);
+                    opc = 0;
+                    while (opc < 1 || opc > 2) {
+                        printf("\t1 - Remover\n\t2 - Parar\n");
+                        scanf("%d", &opc);
+                        if (opc < 1 || opc > 2) printf("Operacao invalida!\n");
+                    }
                 }
             } else printf("Nao foi criado nenhum grafo!\n");
             break;
@@ -71,12 +79,29 @@ int main () {
             break;
         case 5:
             if (grafo) {
-                printf("\n\tPROFUNDIDADE\n\n");
-                printf("\tPosicao de inicio: ");
-                scanf("%d", &orig);
-                auxBP(grafo, orig, vis);
-                print_vetor_int(vis,grafo->n_vertices);
-                printf("\n");
+                printf("\n\tBUSCA\n\n");
+                opc = 0;
+                while (opc < 1 || opc > 2) {
+                    printf("\t1 - Profundidade\n\t2 - Largura\n\t");
+                    scanf("%d", &opc);
+                    if (opc < 1 || opc > 2) printf("Operacao invalida!\n\n");
+                } 
+                if (opc == 1) {
+                    printf("\n\tPROFUNDIDADE\n\n");
+                    printf("\tPosicao de inicio: ");
+                    scanf("%d", &orig);
+                    auxBP(grafo, orig, vis);
+                    print_vetor_int(vis,grafo->n_vertices);
+                    printf("\n");
+                }
+                else {
+                    printf("\n\tLARGURA\n\n");
+                    printf("\tPosicao de inicio: ");
+                    scanf("%d", &orig);
+                    buscaLargura(grafo, orig, vis);
+                    print_vetor_int(vis,grafo->n_vertices);
+                    printf("\n");
+                }
             } else printf("Nao foi criado nenhum grafo!\n");
             break;  
         // case 99:

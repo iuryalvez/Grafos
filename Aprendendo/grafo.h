@@ -24,20 +24,22 @@ int removerAresta(Grafo *grafo, int orig, int dest, int eh_digrafo);
 void imprimirGrafo(Grafo *grafo);
 
 /**
- * @brief função recursiva que calcula a profundidade dos elementos de um grafo de acordo com uma posição (beg) de início
+ * @brief função recursiva que calcula a profundidade dos elementos de um grafo de acordo com uma posição (src) de início
  * 
  * @param grafo grafo referência
- * @param beg posição de início
+ * @param src posição de início
  * @param vis vetor de visitados
  * @param cont contador de profundidade
  */
-void buscaProfundidade(Grafo *grafo, int beg, int *vis, int cont);
+void buscaProfundidade(Grafo *grafo, int src, int *vis, int cont);
 
 /**
  * @brief função auxiliar da buscaProfundidade que zera o vetor de visitados (cálculo da profundidade)
  * 
  * @param grafo grafo referência
- * @param beg início
+ * @param src início
  * @param vis vetor de visitados
  */
-void auxBP(Grafo *grafo, int beg, int *vis);
+void auxBP(Grafo *grafo, int src, int *vis);
+
+void buscaLargura(Grafo *grafo, int src, int *vis);

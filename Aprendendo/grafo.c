@@ -5,7 +5,7 @@ void menu() {
     printf("2 - Inserir aresta\n");
     printf("3 - Remover aresta\n");
     printf("4 - Imprimir informacoes do grafo\n");
-    printf("5 - Calcular profundidade dos elementos\n");
+    printf("5 - Busca\n");
     // printf("99 - Destruir grafo\n");
     printf("0 - Sair\n");
 }
@@ -136,21 +136,51 @@ void imprimirGrafo(Grafo *grafo) {
     } else printf("Erro de memoria! [imprimirGrafo]\n\n");   
 }
 
-void buscaProfundidade(Grafo *grafo, int beg, int *vis, int cont) {
+void buscaProfundidade(Grafo *grafo, int src, int *vis, int cont) {
     // a função utiliza as informações do grafo para calcular a profundidade de cada elemento
     // verifica-se por linha da matriz de adjacências as conexões de cada elemento e quão profundas elas são (de acordo com o cont)
-    int i; // calcula a profundidade de acordo com o vértice de origem 'beg'
-    vis[beg] = cont; // marca o vértice visitado com cont (se for 0 é pq n foi visitado), visita os vizinhos ainda não visitados
-    for (i = 0; i < grafo->grau[beg]; i++) {
-        if (!vis[grafo->arestas[beg][i]]) buscaProfundidade(grafo,grafo->arestas[beg][i],vis,cont+1); // passa o cont+1 pq significa que esta mais profundo em relação ao beg
-    }
+    int i; // calcula a profundidade de acordo com o vértice de origem 'src'
+    vis[src] = cont; // marca o vértice visitado com cont (se for 0 é pq n foi visitado), visita os vizinhos ainda não visitados
+    for (i = 0; i < grafo->grau[src]; i++) { // visitando os vizinhos (o grafo->grau indica quantos vizinhos tem na lista de adjacências)
+        if (!vis[grafo->arestas[src][i]]) buscaProfundidade(grafo,grafo->arestas[src][i],vis,cont+1); // passa o cont+1 pq significa que esta mais profundo em relação ao src
+    } // se não foi visitado para o vizinho da posição 'i', visita e guarda as informações dele
 }
 
-void auxBP(Grafo *grafo, int beg, int *vis) {
+void auxBP(Grafo *grafo, int src, int *vis) {
     // zera as posições para o cálculo da profundidade de inícios diferentes
     int i, cont = 1;
     for (i = 0; i < grafo->n_vertices; i++) {
         vis[i] = 0; // preenche o vetor de visitados com o valor 0, marca os vertices nao visitados
     }
-    buscaProfundidade(grafo,beg,vis,cont);
+    buscaProfundidade(grafo,src,vis,cont);
+}
+
+void buscaLargura(Grafo *grafo, int src, int *vis) {
+    int i; // auxiliar
+    int vert; // vértice atual
+    int cont = 1; // largura inicial 
+    int *fila; // guarda a ordem que visitou os vértices
+    int IF = 0; // início da fila 
+    int FF = 0; // final da fila
+
+    for (i = 0; i < grafo->n_vertices; i++) vis[i] = 0; // zera as posições para o cálculo da largura de inícios diferentes
+    
+    fila = (int *) malloc(grafo->n_vertices * sizeof(int)); // cria fila
+    FF++; 
+    fila[FF] = src; // insere src na fila
+    vis[src] = cont; // o vetor de visitados armazena o valor de cont na posição do src
+    
+    while (IF != FF) { // a fila está crescendo assim: 1 -> 1 2 -> 1 2 3 -> 1 2 3 4 -> ... 
+        IF = (IF + 1) % grafo->n_vertices; // atualiza o próximo início da fila
+        vert = fila[IF]; // pega o primeiro da fila
+        cont++; // atualiza o cont para o próximo
+        for (i = 0; i < grafo->grau[vert]; i++) { // visitando os vizinhos (o grafo->grau indica quantos vizinhos tem na lista de adjacências)
+            if (!vis[grafo->arestas[vert][i]]) { // se não foi visitado para o vizinho da posição 'i', visita e guarda as informações dele
+                FF = (FF + 1) % grafo->n_vertices; // atualiza o final da fila para visitar o próximo
+                fila[FF] = grafo->arestas[vert][i]; // novo final da fila
+                vis[grafo->arestas[vert][i]] = cont; // visitamos ele, agora irá verificar o próximo vizinho;
+            }
+        }
+    }
+    free(fila); // libera a fila
 }
