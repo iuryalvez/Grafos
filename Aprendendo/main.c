@@ -10,6 +10,7 @@ int main () {
     Grafo *grafo = NULL; // vetor de grafos
 
     int orig, dest, ed; // caracteristicas da aresta
+    int *vis; // vetor de visitados (cálculo de profundidade)
     float peso;
     int op, opc; // operadores
     
@@ -19,58 +20,77 @@ int main () {
         scanf("%d", &op);
         switch (op) {
         case 1:
-            printf("\nCRIANDO O GRAFO\n\n");
-            grafo = criarGrafo();
+            if (!grafo) {
+                printf("\n\tCRIANDO O GRAFO\n\n");
+                grafo = criarGrafo();
+                vis = aloca_vetor_int(grafo->n_vertices);
+            } else printf("\tJa existe um grafo criado!\n");
             break;
         case 2:
-            printf("\nINSERINDO ARESTAS\n\n");
-            while (opc == 1) {
-                printf("Posicao dos dois grafos a serem conectados: ");
-                scanf("%d %d", &orig, &dest);
-                printf("1 - Se for digrafo\n0 - Se nao for\n");
-                scanf("%d", &ed);
-                if (ed == 2) ed = 0;
-                if (grafo->eh_ponderado == 1) {
-                    printf("Peso da aresta: ");
-                    scanf("%f", &peso);
+            if (grafo) {
+                printf("\n\tINSERINDO ARESTAS\n\n");
+                while (opc == 1) {
+                    printf("\tPosicao dos dois grafos a serem conectados: ");
+                    scanf("%d %d", &orig, &dest);
+                    printf("\t1 - Se for digrafo (Ida)\n\t0 - Se nao for (Ida e Volta)\n\t");
+                    scanf("%d", &ed);
+                    if (grafo->eh_ponderado == 1) {
+                        printf("Peso da aresta: ");
+                        scanf("%f", &peso);
+                    }
+                    inserirAresta(grafo, orig, dest, ed, peso);
+                    printf("\t1 - Inserir\n\t2 - Parar\n\t");
+                    scanf("%d", &opc);
                 }
-                inserirAresta(grafo, orig, dest, ed, peso);
-                printf("\n\n1 - Inserir\n2 - Parar\n");
-                scanf("%d", &opc);
-            }
+            } else printf("Nao foi criado nenhum grafo!\n");
             break;
         case 3:
-            printf("\nREMOVENDO ARESTAS\n\n");
-            while (opc == 1) {
-                printf("Posicao dos dois grafos a serem desconectados: ");
-                scanf("%d %d", &orig, &dest);
-                printf("1 - Se for digrafo\n0 - Se nao for\n");
-                scanf("%d", &ed);
-                if (ed == 2) ed = 0;
-                if (grafo->eh_ponderado == 1) {
-                    printf("Peso da aresta: ");
-                    scanf("%f", &peso);
+            if (grafo) {
+                printf("\n\tREMOVENDO ARESTAS\n\n");
+                while (opc == 1) {
+                    printf("\tPosicao dos dois grafos a serem desconectados: ");
+                    scanf("%d %d", &orig, &dest);
+                    printf("\t1 - Se for digrafo (Ida)\n\t0 - Se nao for (Ida e Volta)\n\t");
+                    scanf("%d", &ed);
+                    if (ed == 2) ed = 0;
+                    if (grafo->eh_ponderado == 1) {
+                        printf("\tPeso da aresta: ");
+                        scanf("%f", &peso);
+                    }
+                    removerAresta(grafo, orig, dest, ed);
+                    printf("\t1 - Remover\n\t2 - Parar\n");
+                    scanf("%d", &opc);
                 }
-                removerAresta(grafo, orig, dest, ed);
-                printf("\n\n1 - Remover\n2 - Parar\n");
-                scanf("%d", &opc);
-            }
+            } else printf("Nao foi criado nenhum grafo!\n");
             break;
         case 4:
-            printf("\nIMPRIMINDO GRAFO\n\n");
-            imprimirGrafo(grafo);   
+            if (grafo) {
+                printf("\n\tIMPRIMINDO GRAFO\n\n");
+                imprimirGrafo(grafo);   
+            } else printf("Nao ha grafo criado!\n");
             break;
         case 5:
-            printf("\nLIBERANDO GRAFO\n\n");
-            liberarGrafo(grafo); 
-            break;
+            if (grafo) {
+                printf("\n\tPROFUNDIDADE\n\n");
+                printf("\tPosicao de inicio: ");
+                scanf("%d", &orig);
+                auxBP(grafo, orig, vis);
+                print_vetor_int(vis,grafo->n_vertices);
+                printf("\n");
+            } else printf("Nao foi criado nenhum grafo!\n");
+            break;  
+        // case 99:
+        //     printf("\n\tLIBERANDO GRAFO\n\n");
+        //     if (grafo) liberarGrafo(grafo); 
+        //     else printf("Nao foi criado nenhum grafo para ser liberado!\n");
+        //     break;
         default:
             if (op != 0) printf("Operacao inválida!\n");
             break;
         }
     } while (op != 0);
     
-    if (grafo != NULL) liberarGrafo(grafo);
+    if (grafo) liberarGrafo(grafo);
 
     return 0;
 }

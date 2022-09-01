@@ -1,12 +1,17 @@
 #include "vet-mat.h"
 
 void print_vetor_int(int *vetor, int tam) {
-    int i = 0;
-    printf("\t");
-    printf("%d", vetor[i]);
+    int i;
+    for (i = 0; i < tam; i++) {
+        if (i == 0) printf("\n\tNos -> %2d", i); 
+        else printf(" %2d", i);
+    }
+    printf("\n\t");
+    i = 0;
+    printf("       %2d", vetor[i]);
     i++;
     for (; i < tam; i++) {
-        printf(" %d", vetor[i]);
+        printf(" %2d", vetor[i]);
     }
     printf("\n");
 }
@@ -65,8 +70,10 @@ int **aloca_matriz_int(int l, int c) {
 void libera_matriz_int(int **matriz, int l) {
     int i, j;
     for (i = 0; i < l; i++) {
+        matriz[i] = NULL;
         free(matriz[i]);
     }
+    matriz = NULL;
     free(matriz);
 }
 
