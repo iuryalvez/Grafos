@@ -91,6 +91,7 @@ int main () {
                     printf("\tPosicao de inicio: ");
                     scanf("%d", &orig);
                     auxBP(grafo, orig, vis);
+                    printf("\n");
                     print_vetor_int(vis,grafo->n_vertices);
                     printf("\n");
                 }
@@ -99,6 +100,7 @@ int main () {
                     printf("\tPosicao de inicio: ");
                     scanf("%d", &orig);
                     buscaLargura(grafo, orig, vis);
+                    printf("\n");
                     print_vetor_int(vis,grafo->n_vertices);
                     printf("\n");
                 }

@@ -141,8 +141,12 @@ void buscaProfundidade(Grafo *grafo, int src, int *vis, int cont) {
     // verifica-se por linha da matriz de adjacências as conexões de cada elemento e quão profundas elas são (de acordo com o cont)
     int i; // calcula a profundidade de acordo com o vértice de origem 'src'
     vis[src] = cont; // marca o vértice visitado com cont (se for 0 é pq n foi visitado), visita os vizinhos ainda não visitados
+    printf("\n\tProfundidade: %d | Ligacao: %d", cont, src);
     for (i = 0; i < grafo->grau[src]; i++) { // visitando os vizinhos (o grafo->grau indica quantos vizinhos tem na lista de adjacências)
-        if (!vis[grafo->arestas[src][i]]) buscaProfundidade(grafo,grafo->arestas[src][i],vis,cont+1); // passa o cont+1 pq significa que esta mais profundo em relação ao src
+        if (!vis[grafo->arestas[src][i]]) {
+            printf(" -> %d", grafo->arestas[src][i]);
+            buscaProfundidade(grafo,grafo->arestas[src][i],vis,cont+1); // passa o cont+1 pq significa que esta mais profundo em relação ao src
+        }
     } // se não foi visitado para o vizinho da posição 'i', visita e guarda as informações dele
 }
 
@@ -170,6 +174,7 @@ void buscaLargura(Grafo *grafo, int src, int *vis) {
     fila[FF] = src; // insere src na fila
     vis[src] = cont; // o vetor de visitados armazena o valor de cont na posição do src
     
+    printf("\t%d", src);
     while (IF != FF) { // a fila está crescendo assim: 1 -> 1 2 -> 1 2 3 -> 1 2 3 4 -> ... 
         IF = (IF + 1) % grafo->n_vertices; // atualiza o próximo início da fila
         vert = fila[IF]; // pega o primeiro da fila
@@ -179,6 +184,7 @@ void buscaLargura(Grafo *grafo, int src, int *vis) {
                 FF = (FF + 1) % grafo->n_vertices; // atualiza o final da fila para visitar o próximo
                 fila[FF] = grafo->arestas[vert][i]; // novo final da fila
                 vis[grafo->arestas[vert][i]] = cont; // visitamos ele, agora irá verificar o próximo vizinho;
+                printf(" -> %d", grafo->arestas[vert][i]);
             }
         }
     }
