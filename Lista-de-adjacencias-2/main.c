@@ -1,7 +1,7 @@
 #include "grafo.h"
 
 /*
-gcc grafo.c vet-mat.c main.c -o grafo.exe
+gcc grafo.c main.c -o grafo.exe
 ./grafo.exe
 */
 
@@ -39,7 +39,7 @@ int main () {
                         scanf("%f", &peso);
                     }
                     inserirAresta(grafo, orig, dest, ed, peso);
-                    opc = 0;
+                    opc = FALSE;
                     while (opc < 1 || opc > 2) {
                         printf("\t1 - Inserir\n\t2 - Parar\n\t");
                         scanf("%d", &opc);
@@ -62,7 +62,7 @@ int main () {
                         scanf("%f", &peso);
                     }
                     removerAresta(grafo, orig, dest, ed);
-                    opc = 0;
+                    opc = FALSE;
                     while (opc < 1 || opc > 2) {
                         printf("\t1 - Remover\n\t2 - Parar\n\t");
                         scanf("%d", &opc);
@@ -80,7 +80,7 @@ int main () {
         case 5:
             if (grafo) {
                 printf("\n\tBUSCA\n\n");
-                opc = 0;
+                opc = FALSE;
                 while (opc < 1 || opc > 2) {
                     printf("\t1 - Profundidade\n\t2 - Largura\n\t");
                     scanf("%d", &opc);
@@ -91,7 +91,6 @@ int main () {
                     printf("\tPosicao de inicio: ");
                     scanf("%d", &orig);
                     auxBP(grafo, orig, vis);
-                    printf("\n");
                     imprimirVisitados(vis,grafo->n_vertices);
                     printf("\n");
                 }
@@ -100,7 +99,6 @@ int main () {
                     printf("\tPosicao de inicio: ");
                     scanf("%d", &orig);
                     buscaLargura(grafo, orig, vis);
-                    printf("\n");
                     imprimirVisitados(vis,grafo->n_vertices);
                     printf("\n");
                 }

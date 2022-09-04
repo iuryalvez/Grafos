@@ -49,16 +49,22 @@ Grafo *criarGrafo() {
 }
 
 Vertice *criarVertices (Grafo *grafo) {
-    int i;
+    int i, j;
     if (grafo) {
         Vertice *verts = malloc(sizeof(Vertice)*grafo->n_vertices); // alocando memória para meu visitados de vértices
-        verts->grau = 0;
+        verts->grau = FALSE;
         for (i = 0; i < grafo->n_vertices; i++) {
             verts[i].arestas = (int *) malloc(sizeof(int)*grafo->n_vertices); // alocando memória para o armazenar o máximo de arestas (ligar com todos)
+            for (j = 0; j < grafo->n_vertices; j++) {
+                verts[i].arestas[j] = -1;
+            }
         }
         if (grafo->eh_ponderado) {
             for (i = 0; i < grafo->n_vertices; i++) {
                 verts[i].pesos = (float *) malloc(sizeof(float)*grafo->n_vertices); // se for ponderado, precisa armazenar memória para os pesos
+                for (j = 0; j < grafo->n_vertices; j++) {
+                    verts[i].pesos[j] = -1;
+                }
             }
         }
         return verts;
@@ -223,23 +229,29 @@ void imprimirVisitados(int *visitados, int tam) {
 
 void buscaProfundidade(Grafo *grafo, int src, int *vis, int cont) {
     // a função utiliza as informações do grafo para calcular a profundidade de cada elemento
-    // verifica-se por linha da matriz de adjacências as conexões de cada elemento e quão profundas elas são (de acordo com o cont)
+    // verifica-se as conexões de cada elemento da lista e quão profundas elas são (de acordo com o cont)
     int i; // calcula a profundidade de acordo com o vértice de origem 'src'
     vis[src] = cont; // marca o vértice visitado com cont (se for 0 é pq n foi visitado), visita os vizinhos ainda não visitados
-    printf("\n\tProfundidade: %d | Ligacao: %d", cont, src);
+    
+    // printf("\n\tVisitando os vizinhos de %d:\n\n", src); // Debugando
+    
     for (i = 0; i < grafo->vertices[src].grau; i++) { // visitando os vizinhos (o grafo->grau indica quantos vizinhos tem na lista de adjacências)
-        if (!vis[grafo->vertices[src].arestas[i]]) {
-            printf(" -> %d", grafo->vertices[src].arestas[i]);
+
+        // printf("\t(P:%d) Vizinho%d: %d\n\n", cont, i+1, grafo->vertices[src].arestas[i]); // Debugando
+    
+        if (vis[grafo->vertices[src].arestas[i]] == -1) { // se não foi visitado para o vizinho da posição 'i', visita e guarda as informações dele
             buscaProfundidade(grafo,grafo->vertices[src].arestas[i],vis,cont+1); // passa o cont+1 pq significa que esta mais profundo em relação ao src
+            // printf("\tValor de vis[%d]: %d\n\n", grafo->vertices[src].arestas[i], vis[grafo->vertices[src].arestas[i]]); // Debugando
         }
-    } // se não foi visitado para o vizinho da posição 'i', visita e guarda as informações dele
+        if (cont+1 < vis[grafo->vertices[src].arestas[i]]) vis[grafo->vertices[src].arestas[i]] = cont+1; // se foi encontrado em outro sub-grafo mas não é tão profundo quanto lá
+    } 
 }
 
 void auxBP(Grafo *grafo, int src, int *vis) {
     // zera as posições para o cálculo da profundidade de inícios diferentes
     int i, cont = 1;
     for (i = 0; i < grafo->n_vertices; i++) {
-        vis[i] = 0; // preenche o visitados de visitados com o valor 0, marca os vertices nao visitados
+        vis[i] = -1; // preenche o visitados de visitados com o valor -1, marca os vertices nao visitados
     }
     buscaProfundidade(grafo,src,vis,cont);
 }
@@ -247,31 +259,36 @@ void auxBP(Grafo *grafo, int src, int *vis) {
 void buscaLargura(Grafo *grafo, int src, int *vis) {
     int i; // auxiliar
     int vert; // vértice atual
-    int cont = 1; // largura inicial 
-    int *fila; // guarda a ordem que visitou os vértices
-    int IF = 0; // início da fila 
-    int FF = 0; // final da fila
+    int *ordem; // guarda a ordem que visitou os vértices
+    int cont1 = 0; // início da ordem 
+    int cont2 = 1; // final da ordem
 
-    for (i = 0; i < grafo->n_vertices; i++) vis[i] = 0; // zera as posições para o cálculo da largura de inícios diferentes
+    // inicializando o vetor de visitados com um valor inválido para identificarmos que não foi visitado
+    for (i = 0; i < grafo->n_vertices; i++) vis[i] = -1; // -1 é o valor inváldo para sabermos que não foi visitado
+
+    ordem = (int *) malloc(grafo->n_vertices * sizeof(int)); // cria ordem dinamicamente
+    ordem[0] = src; // insere src na ordem, é o primeiro
+    vis[src] = 1; // o vetor de visitaodos na posição src é o raio inicial 
     
-    fila = (int *) malloc(grafo->n_vertices * sizeof(int)); // cria fila
-    FF++; 
-    fila[FF] = src; // insere src na fila
-    vis[src] = cont; // o visitados de visitados armazena o valor de cont na posição do src
-    
-    printf("\t%d", src);
-    while (IF != FF) { // a fila está crescendo assim: 1 -> 1 2 -> 1 2 3 -> 1 2 3 4 -> ... 
-        IF = (IF + 1) % grafo->n_vertices; // atualiza o próximo início da fila
-        vert = fila[IF]; // pega o primeiro da fila
-        cont++; // atualiza o cont para o próximo
-        for (i = 0; i < grafo->vertices[vert].grau; i++) { // visitando os vizinhos (o grafo->grau indica quantos vizinhos tem na lista de adjacências)
-            if (!vis[grafo->vertices[vert].arestas[i]]) { // se não foi visitado para o vizinho da posição 'i', visita e guarda as informações dele
-                FF = (FF + 1) % grafo->n_vertices; // atualiza o final da fila para visitar o próximo
-                fila[FF] = grafo->vertices[vert].arestas[i]; // novo final da fila
-                vis[grafo->vertices[vert].arestas[i]] = cont; // visitamos ele, agora irá verificar o próximo vizinho;
-                printf(" -> %d", grafo->vertices[vert].arestas[i]);
+    while (cont1 != cont2) { // iremos somar cont2 até um número limite e só pararemos quando cont1 chegar em cont2
+        vert = ordem[cont1]; // pega o vert atualizado da ordem, VERIFICA OS VIZINHOS DELE
+        
+        // printf("\n\tVisitando os vizinhos de %d:\n", vert); // Debugando
+
+        for (i = 0; i < grafo->vertices[vert].grau; i++) { // visitando os vizinhos (o grau do vertice indica quantos vizinhos tem na lista de adjacências)
+            
+            // printf("\n\tVizinho %d: %d\n\n", i+1, grafo->vertices[vert].arestas[i]);
+            // printf("\tRaio: %d\n\n", raio);
+            
+            if (vis[grafo->vertices[vert].arestas[i]] == -1) { // se não foi visitado para o vizinho da posição 'i', visita e guarda as informações dele
+                ordem[cont2] = grafo->vertices[vert].arestas[i]; // novo ultimo elemento da ordem
+                vis[grafo->vertices[vert].arestas[i]] = vis[vert]+1; // o raio do vizinho i de VERT vale o raio do VERT+1;
+                cont2++; // atualiza o final da ordem para o próximo vizinho se houver
             }
+
+            // imprimirVisitados(vis,grafo->n_vertices); // Debugando 
         }
+        cont1++; // atualiza o próximo início da ordem
     }
-    free(fila); // libera a fila
+    free(ordem); // libera a ordem
 }
