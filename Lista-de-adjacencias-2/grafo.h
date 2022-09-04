@@ -120,12 +120,28 @@ void buscaLargura(Grafo *grafo, int src, int *vis);
 int *alocarVisitados(int tam);
 
 /**
+ * @brief função que aloca memória dinamicamente para o vetor de distâncias
+ * 
+ * @param tam tamanho do vetor
+ * @return float* vetor alocado dinamicamente
+ */
+float *alocarDist(int tam);
+
+/**
  * @brief função que imprime o vetor de visitados em formatação compreensível
  * 
  * @param visitados vetor de visitados
  * @param tam tamanho do vetor
  */
 void imprimirVisitados(int *visitados, int tam);
+
+/**
+ * @brief função que imprime as distâncias entre os vértices
+ * 
+ * @param dist vetor de distâncias
+ * @param tam tamanho do vetor
+ */
+void imprimirDist(float *dist, int tam);
 
 /**
  * @brief função auxiliar das buscas que zera o vetor de visitados para novas eventuais buscas
@@ -154,3 +170,6 @@ void menorCaminho(Grafo *grafo, int ini, int *ordem, float *dist);
  * @return int 
  */
 int procuraMenorDistancia(float *dist, int *visitados, int NV);
+
+// Limpa o terminal
+void clear_screen();

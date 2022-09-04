@@ -176,8 +176,8 @@ void imprimirVertices(Grafo *grafo) {
         printf("\n");
     } 
     if (grafo->eh_ponderado == 1) {
-        printf("\tLista de pesos das adjacencias\n\n");
-        printf("\t        |");
+        printf("\n\tLista de pesos das adjacencias\n\n");
+        printf("\t         |");
         for (i = 0; i < grafo->grau_max; i++) {
             printf(" Grau%d |", i);
         }
@@ -185,20 +185,19 @@ void imprimirVertices(Grafo *grafo) {
         for (i = 0; i < grafo->n_vertices; i++) {
             printf("\t| No %3d |", i);
             for (j = 0; j < grafo->grau_max; j++) {
-                if (j < grafo->vertices[i].grau) printf(" %5f |", grafo->vertices[i].pesos[j]);
+                if (j < grafo->vertices[i].grau) printf(" %.3f |", grafo->vertices[i].pesos[j]);
             }
             printf("\n");
         }
     } else printf("\n\tO grafo nao eh ponderado\n\n");
     
-    printf("\n\tLigacoes de cada vertice:\n\n");
+    printf("\n\tLigacoes de cada vertice:\n");
     for (i = 0; i < grafo->n_vertices; i++) {
-        if (i == 0) printf("\n\t     Nos -> %2d", i); 
+        if (i == 0) printf("\n\tVertices -> %2d", i); 
         else printf(" %2d", i);
     }
-    printf("\n\t");
     i = 0;
-    printf("Ligacoes -> %2d", grafo->vertices[i].grau);
+    printf("\n\tLigacoes -> %2d", grafo->vertices[i].grau);
     i++;
     for (; i < grafo->n_vertices; i++) {
         printf(" %2d", grafo->vertices[i].grau);
@@ -215,15 +214,31 @@ int *alocarVisitados(int tam) {
 void imprimirVisitados(int *visitados, int tam) {
     int i;
     for (i = 0; i < tam; i++) {
-        if (i == 0) printf("\n\t   Nos -> %2d", i); 
+        if (i == 0) printf("\n\tVertice -> %2d", i); 
         else printf(" %2d", i);
     }
     printf("\n\t");
     i = 0;
-    printf("Niveis -> %2d", visitados[i]);
+    printf(" Niveis -> %2d", visitados[i]);
     i++;
     for (; i < tam; i++) {
         printf(" %2d", visitados[i]);
+    }
+    printf("\n");
+}
+
+void imprimirDist(float *dist, int tam) {
+    int i;
+    for (i = 0; i < tam; i++) {
+        if (i == 0) printf("\n\t Vertices -> %4d", i); 
+        else printf(" %4d", i);
+    }
+    printf("\n\t");
+    i = 0;
+    printf("Distancia -> %.2f", dist[i]);
+    i++;
+    for (; i < tam; i++) {
+        printf(" %.2f", dist[i]);
     }
     printf("\n");
 }
@@ -243,13 +258,18 @@ void buscaProfundidade(Grafo *grafo, int src, int *vis, int cont) {
     
     for (i = 0; i < grafo->vertices[src].grau; i++) { // visitando os vizinhos (o grafo->grau indica quantos vizinhos tem na lista de adjacências)
 
+        // printf("\tVizinhos de '%d':\n", src);
         // printf("\t(P:%d) Vizinho%d: %d\n\n", cont, i+1, grafo->vertices[src].arestas[i]); // Debugando
-    
+
         if (!vis[grafo->vertices[src].arestas[i]]) { // se não foi visitado para o vizinho da posição 'i', visita e guarda as informações dele
             buscaProfundidade(grafo,grafo->vertices[src].arestas[i],vis,cont+1); // passa o cont+1 pq significa que esta mais profundo em relação ao src
             // printf("\tValor de vis[%d]: %d\n\n", grafo->vertices[src].arestas[i], vis[grafo->vertices[src].arestas[i]]); // Debugando
         }
-        if (cont+1 < vis[grafo->vertices[src].arestas[i]]) vis[grafo->vertices[src].arestas[i]] = cont+1; // se foi encontrado em outro sub-grafo mas não é tão profundo quanto lá
+        if (cont+1 < vis[grafo->vertices[src].arestas[i]]) { // se foi encontrado em outro sub-grafo mas não é tão profundo quanto lá
+            vis[grafo->vertices[src].arestas[i]] = cont+1; 
+            buscaProfundidade(grafo,grafo->vertices[src].arestas[i],vis,cont+1); // precisamos recalcular a profundiade dos outros elementos saindo dos vizinhos desse
+            // pq se está errado pra esse vizinho, também vai estar errado para os vizinhos dele
+        }
     } 
 }
 
@@ -287,34 +307,93 @@ void buscaLargura(Grafo *grafo, int src, int *vis) {
     free(ordem); // libera a ordem
 }
 
+float *alocarDist(int tam) {
+    int i;
+    float *dist = malloc(sizeof(float) * tam);
+    return dist;
+}
+
 void menorCaminho(Grafo *grafo, int ini, int *ordem, float *dist) {
+    // Algoritmo de Dijkstra
+    int i, cont, vizinho, *visitados, vert;
     
-    int i, cont, NV, ind, *visitados, u;
-    
-    cont = NV = grafo->n_vertices;
+    cont = grafo->n_vertices;
 
-    visitados = alocarVisitados(grafo->n_vertices);
+    visitados = alocarVisitados(grafo->n_vertices); // calloc
 
-    for (i = 0; i < NV; i++) {
-        ordem[i] = -1;
-        dist[i] = -1;
+    for (i = 0; i < grafo->n_vertices; i++) { // inicializando com valores inválidos
+        ordem[i] = -1; 
+        dist[i] = -1; 
     }
+
+    dist[ini] = 0; // distância do início pra ele mesmo é 0
+    // vai ser o primeiro vértice a ser visitado pq vai ser o único com valor válido
+
+    while (cont > 0) {
+        vert = procuraMenorDistancia(dist,visitados,grafo->n_vertices);  // procura a menor distância entre os vizinhos de vert
+        if (vert == -1) break; // se não houver caminho partindo de ini
+        
+        visitados[vert] = 1; // vert agora foi visitado
+        
+        for (i = 0; i < grafo->vertices[vert].grau; i++) { // para cada vértice vizinho do meu VERT, eu preciso calcular a distância dele até VERT
+            vizinho = grafo->vertices[vert].arestas[i]; // calculando a dist do vizinho 'i' e atualizando a distância dos vizinhos que já existem
+            if (!grafo->eh_ponderado) { //  se não é ponderado, considerar cada aresta com peso unitário
+                
+                // se a dist do vizinho for menor que 0, colocamos a distância atual lá (distância de vert+1)
+                // mas se já houver uma dist no vizinho, verifica se a dist[vert]+1 não é menor que a que está lá...
+                // porque se a distância do vert + 1 for MENOR que a distância ATUAL do vizinho, então temos que atualizar a distância do vizinho...
+                // porque siginifica que encontramos uma distância MENOR pra chegar no vizinho 'i', que é o que queremos. 
+                
+                if (dist[vizinho] < 0 || dist[vizinho] > dist[vert]+1) { // verificando as distâncias de vert com seus vizinhos
+                    dist[vizinho] = dist[vert]+1; // se ele é um vizinho de vert, a distância dele pro vert é dist[vert]+1
+                    ordem[vizinho] = vert; // para chegar no viznho, tem que chegar a partir de vert 
+                }
+            }
+            else {
+
+                // se a dist do vizinho for menor que 0, colocamos a distância atual lá (distância de vert + os devidos pesos)
+                // mas se já houver uma dist no vizinho, verifica se a dist[vert]+pesos não é menor que a que está lá...
+                // porque se a distância do vert+PESOS for MENOR que a distância ATUAL do vizinho, então temos que atualizar a distância do vizinho...
+                // porque siginifica que encontramos uma distância MENOR pra chegar no vizinho 'i', que é o que queremos. 
+                
+                if (dist[vizinho] < 0 || dist[vizinho] > dist[vert] + grafo->vertices[vert].pesos[i]) { // se o peso dessa ligação é menor que antes
+                    dist[vizinho] = dist[vert] + grafo->vertices[vert].pesos[i]; // se é ponderado, verificar qual o peso da ligação e colocar quanto vale
+                    ordem[vizinho] = vert; // para chegar no vizinho, tem que chegar a partir de vert
+                }
+            }
+        }
+        
+        cont--;
+    }
+
+    free(visitados);
 
 }
 
 int procuraMenorDistancia(float *dist, int *visitados, int NV) {
+    // Estamos procurando a menor distância entre os vizinhos que não foram visitados.
     int i; // auxiliar
-    int menor = -1; // 
+    int menor;
     int primeiro = 1;
     for (i = 0; i < NV; i++) {
-        if (dist[i] >= 0 && visitados[i] == 0) {
-            if (primeiro) {
+        if (dist[i] >= 0 && visitados[i] == 0) { // se a dist[i] for um valor válido e ainda não tiver sido visitado...
+            if (primeiro) { // se for o primeiro, coloca um valor válido no menor
                 menor = i;
                 primeiro = 0;
-            } else {
+            } else { // se não, verificar se existe uma dist que é menor que a do menor
                 if (dist[menor] > dist[i]) menor = i;
             }
         }
     }
     return menor;
+}
+
+void clear_screen() {
+    #ifdef __linux__
+        system("clear");
+    #elif _WIN32
+        system("cls");
+    #else
+
+    #endif
 }

@@ -10,8 +10,8 @@ int main () {
     Grafo *grafo = NULL; // vetor de grafos
 
     int orig, dest, ed; // caracteristicas da aresta
-    int *vis; // vetor de visitados (cálculo de profundidade)
-    float peso;
+    int *vis, *ordem; // vetor de visitados (cálculo de profundidade)
+    float peso, *dist;
     int op, opc; // operadores
     
     do {
@@ -24,6 +24,8 @@ int main () {
                 printf("\n\tCRIANDO O GRAFO\n\n");
                 grafo = criarGrafo();
                 vis = alocarVisitados(grafo->n_vertices);
+                ordem = alocarVisitados(grafo->n_vertices);
+                dist = alocarDist(grafo->n_vertices);
             } else printf("\tJa existe um grafo criado!\n");
             break;
         case 2:
@@ -35,7 +37,7 @@ int main () {
                     printf("\t1 - Se for digrafo (Ida)\n\t0 - Se nao for (Ida e Volta)\n\t");
                     scanf("%d", &ed);
                     if (grafo->eh_ponderado == 1) {
-                        printf("Peso da aresta: ");
+                        printf("\n\tPeso da aresta: ");
                         scanf("%f", &peso);
                     }
                     inserirAresta(grafo, orig, dest, ed, peso);
@@ -82,34 +84,68 @@ int main () {
                 printf("\n\tBUSCA\n\n");
                 auxBuscas(vis,grafo->n_vertices);
                 opc = FALSE;
-                while (opc < 1 || opc > 2) {
-                    printf("\t1 - Profundidade\n\t2 - Largura\n\t");
+                while (opc < 1 || opc > 3) {
+                    printf("\t1 - PROFUNDIDADE\n\t2 - LARGURA\n\t3 - MENOR CAMINHO\n\t");
                     scanf("%d", &opc);
-                    if (opc < 1 || opc > 2) printf("Operacao invalida!\n\n");
+                    if (opc < 1 || opc > 3) printf("\tOperacao invalida!\n\n");
                 } 
                 if (opc == 1) {
                     printf("\n\tPROFUNDIDADE\n\n");
                     printf("\tPosicao de inicio: ");
                     scanf("%d", &orig);
+                    
                     buscaProfundidade(grafo, orig, vis,1);
+                    
                     imprimirVisitados(vis,grafo->n_vertices);
                     printf("\n");
                 }
-                else {
+                else if (opc == 2) {
                     printf("\n\tLARGURA\n\n");
                     printf("\tPosicao de inicio: ");
                     scanf("%d", &orig);
+                    
                     buscaLargura(grafo, orig, vis);
+                    
                     imprimirVisitados(vis,grafo->n_vertices);
+                    printf("\n");
+                }
+                else if (opc == 3) {
+                    printf("\n\tMENOR CAMINHO (DIJKSTRA)\n\n");
+                    printf("\tPosicao de inicio: ");
+                    scanf("%d", &orig);
+                    
+                    menorCaminho(grafo, orig, ordem, dist);
+                    
+                    printf("\n\tOrdem de visitação para chegar em outros vertices partindo de '%d'\n", orig);
+                    imprimirVisitados(ordem,grafo->n_vertices);
+                    
+                    printf("\n\tPeso dos caminhos para chegar em outros vertices partindo de '%d'\n", orig);
+                    imprimirDist(dist,grafo->n_vertices);
+                    printf("\n");
+                }
+                else {
+                    printf("MENOR CAMINHO (BORUVKA)\n\n");
+                    printf("\tPosicao de inicio: ");
+                    scanf("%d", &orig);
+                    
+                    // menorCaminho(grafo, orig, ordem, dist);
+                    
+                    // printf("\n\tOrdem de visitação para chegar em outros vertices partindo de '%d'\n", orig);
+                    // imprimirVisitados(ordem,grafo->n_vertices);
+                    
+                    // printf("\n\tPeso dos caminhos para chegar em outros vertices partindo de '%d'\n", orig);
+                    // imprimirDist(dist,grafo->n_vertices);
                     printf("\n");
                 }
             } else printf("Nao foi criado nenhum grafo!\n");
             break;  
         default:
-            if (op != 0) printf("Operacao inválida!\n");
+            if (op != 0) printf("\nOperacao inválida!\n");
             break;
         }
     } while (op != 0);
+
+    void clear_screen();
     
     if (grafo) liberarGrafo(grafo);
 
