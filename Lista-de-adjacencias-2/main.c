@@ -80,6 +80,7 @@ int main () {
         case 5:
             if (grafo) {
                 printf("\n\tBUSCA\n\n");
+                auxBuscas(vis,grafo->n_vertices);
                 opc = FALSE;
                 while (opc < 1 || opc > 2) {
                     printf("\t1 - Profundidade\n\t2 - Largura\n\t");
@@ -90,7 +91,7 @@ int main () {
                     printf("\n\tPROFUNDIDADE\n\n");
                     printf("\tPosicao de inicio: ");
                     scanf("%d", &orig);
-                    auxBP(grafo, orig, vis);
+                    buscaProfundidade(grafo, orig, vis,1);
                     imprimirVisitados(vis,grafo->n_vertices);
                     printf("\n");
                 }
@@ -104,11 +105,6 @@ int main () {
                 }
             } else printf("Nao foi criado nenhum grafo!\n");
             break;  
-        // case 99:
-        //     printf("\n\tLIBERANDO GRAFO\n\n");
-        //     if (grafo) liberarGrafo(grafo); 
-        //     else printf("Nao foi criado nenhum grafo para ser liberado!\n");
-        //     break;
         default:
             if (op != 0) printf("Operacao inválida!\n");
             break;

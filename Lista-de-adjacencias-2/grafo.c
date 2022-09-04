@@ -51,7 +51,8 @@ Grafo *criarGrafo() {
 Vertice *criarVertices (Grafo *grafo) {
     int i, j;
     if (grafo) {
-        Vertice *verts = malloc(sizeof(Vertice)*grafo->n_vertices); // alocando memória para meu visitados de vértices
+        Vertice *verts;
+        verts = (Vertice *) malloc(sizeof(Vertice)*grafo->n_vertices); // alocando memória para meu visitados de vértices
         verts->grau = FALSE;
         for (i = 0; i < grafo->n_vertices; i++) {
             verts[i].arestas = (int *) malloc(sizeof(int)*grafo->n_vertices); // alocando memória para o armazenar o máximo de arestas (ligar com todos)
@@ -206,7 +207,7 @@ void imprimirVertices(Grafo *grafo) {
 }
 
 int *alocarVisitados(int tam) {
-    int *visitados = calloc(tam,sizeof(int));
+    int *visitados = malloc(tam*sizeof(int));
     if (!visitados) printf("Erro de alocacao de memoria!\n");
     return visitados;
 }
@@ -227,6 +228,11 @@ void imprimirVisitados(int *visitados, int tam) {
     printf("\n");
 }
 
+void auxBuscas(int *visitados, int tam) {
+    int i;
+    for (i = 0; i < tam; i++) visitados[i] = 0;
+}
+
 void buscaProfundidade(Grafo *grafo, int src, int *vis, int cont) {
     // a função utiliza as informações do grafo para calcular a profundidade de cada elemento
     // verifica-se as conexões de cada elemento da lista e quão profundas elas são (de acordo com o cont)
@@ -239,21 +245,12 @@ void buscaProfundidade(Grafo *grafo, int src, int *vis, int cont) {
 
         // printf("\t(P:%d) Vizinho%d: %d\n\n", cont, i+1, grafo->vertices[src].arestas[i]); // Debugando
     
-        if (vis[grafo->vertices[src].arestas[i]] == -1) { // se não foi visitado para o vizinho da posição 'i', visita e guarda as informações dele
+        if (!vis[grafo->vertices[src].arestas[i]]) { // se não foi visitado para o vizinho da posição 'i', visita e guarda as informações dele
             buscaProfundidade(grafo,grafo->vertices[src].arestas[i],vis,cont+1); // passa o cont+1 pq significa que esta mais profundo em relação ao src
             // printf("\tValor de vis[%d]: %d\n\n", grafo->vertices[src].arestas[i], vis[grafo->vertices[src].arestas[i]]); // Debugando
         }
         if (cont+1 < vis[grafo->vertices[src].arestas[i]]) vis[grafo->vertices[src].arestas[i]] = cont+1; // se foi encontrado em outro sub-grafo mas não é tão profundo quanto lá
     } 
-}
-
-void auxBP(Grafo *grafo, int src, int *vis) {
-    // zera as posições para o cálculo da profundidade de inícios diferentes
-    int i, cont = 1;
-    for (i = 0; i < grafo->n_vertices; i++) {
-        vis[i] = -1; // preenche o visitados de visitados com o valor -1, marca os vertices nao visitados
-    }
-    buscaProfundidade(grafo,src,vis,cont);
 }
 
 void buscaLargura(Grafo *grafo, int src, int *vis) {
@@ -262,9 +259,6 @@ void buscaLargura(Grafo *grafo, int src, int *vis) {
     int *ordem; // guarda a ordem que visitou os vértices
     int cont1 = 0; // início da ordem 
     int cont2 = 1; // final da ordem
-
-    // inicializando o vetor de visitados com um valor inválido para identificarmos que não foi visitado
-    for (i = 0; i < grafo->n_vertices; i++) vis[i] = -1; // -1 é o valor inváldo para sabermos que não foi visitado
 
     ordem = (int *) malloc(grafo->n_vertices * sizeof(int)); // cria ordem dinamicamente
     ordem[0] = src; // insere src na ordem, é o primeiro
@@ -280,7 +274,7 @@ void buscaLargura(Grafo *grafo, int src, int *vis) {
             // printf("\n\tVizinho %d: %d\n\n", i+1, grafo->vertices[vert].arestas[i]);
             // printf("\tRaio: %d\n\n", raio);
             
-            if (vis[grafo->vertices[vert].arestas[i]] == -1) { // se não foi visitado para o vizinho da posição 'i', visita e guarda as informações dele
+            if (!vis[grafo->vertices[vert].arestas[i]]) { // se não foi visitado para o vizinho da posição 'i', visita e guarda as informações dele
                 ordem[cont2] = grafo->vertices[vert].arestas[i]; // novo ultimo elemento da ordem
                 vis[grafo->vertices[vert].arestas[i]] = vis[vert]+1; // o raio do vizinho i de VERT vale o raio do VERT+1;
                 cont2++; // atualiza o final da ordem para o próximo vizinho se houver
@@ -291,4 +285,36 @@ void buscaLargura(Grafo *grafo, int src, int *vis) {
         cont1++; // atualiza o próximo início da ordem
     }
     free(ordem); // libera a ordem
+}
+
+void menorCaminho(Grafo *grafo, int ini, int *ordem, float *dist) {
+    
+    int i, cont, NV, ind, *visitados, u;
+    
+    cont = NV = grafo->n_vertices;
+
+    visitados = alocarVisitados(grafo->n_vertices);
+
+    for (i = 0; i < NV; i++) {
+        ordem[i] = -1;
+        dist[i] = -1;
+    }
+
+}
+
+int procuraMenorDistancia(float *dist, int *visitados, int NV) {
+    int i; // auxiliar
+    int menor = -1; // 
+    int primeiro = 1;
+    for (i = 0; i < NV; i++) {
+        if (dist[i] >= 0 && visitados[i] == 0) {
+            if (primeiro) {
+                menor = i;
+                primeiro = 0;
+            } else {
+                if (dist[menor] > dist[i]) menor = i;
+            }
+        }
+    }
+    return menor;
 }
