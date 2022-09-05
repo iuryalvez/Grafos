@@ -166,7 +166,7 @@ void imprimirVertices(Grafo *grafo) {
 
     printf("\t        |");
     for (i = 0; i < grafo->grau_max; i++) {
-        printf(" Grau%d |", i);
+        printf(" Adjc%d |", i+1);
     }
     printf("\n");
     for (i = 0; i < grafo->n_vertices; i++) {
@@ -391,16 +391,18 @@ int procuraMenorDistancia(float *dist, int *visitados, int NV) {
 
 void algoritmoBoruvka (Grafo *grafo, int *ordem, float *dist) {
     
-    // Todos os vértices podem ser conectados e NÃO são direcionados (dígrafos), ou seja, há arestas com pesos estabelecidas entre todos eles.
+    // Todos os vértices podem ser conectados (Completo), ou seja, há arestas com pesos estabelecidas entre todos eles.
+    // É um grafo fortemente conexo
     
     int **grupos = alocarGrupos(grafo->n_vertices); // alocando os grupos dinamicamente
     int *validos = alocarVetor_I(grafo->n_vertices); // alocando o vetor de inteiros dinamicamente
 
     invalidaGrupos(grupos, grafo->n_vertices); // colocando -1 em todas as posições dos grupos
     validaVetor(validos,grafo->n_vertices); // colocando 1 em todas as posições do vetor de valores válidos
-
+    
     int cont = 1; // contador de quantos grupos já foram somados
     int i; // vértice atual
+    int j;
     int vp; // vizinho mais próximo
     int *ord;
 
@@ -408,81 +410,122 @@ void algoritmoBoruvka (Grafo *grafo, int *ordem, float *dist) {
     while (cont != grafo->n_vertices) {
         for (i = 0; i < grafo->n_vertices; i++) {
             if (!validos[i]) continue; // se não é um grupo válido, vai pra próxima iteração
-            vp = vizinhoMaisProximo_G(grafo->vertices, grupos[i], ord); // calculando o vizinho mais próximo de i (é definido que existe um mais próximo)
-            unirGrupos(grupos[i],grupos[vp]); // unindo os dois grupos a partir do vizinho mais pŕoximo
-            validos[vp] = 0; // não é mais um grupo válido
-            ordem[vp] = ord[0]; // vp deve ser acessado por ord[0], que é seu vizinho mais próximo
+            
+            imprimirGrupo(grupos[i]); // Debug verificação
+            
+            vp = VMPdoGrupo(grafo->vertices, grupos[i], ord); // calculando o vizinho mais próximo de i (é definido que existe um mais próximo)
+            // vp encontrado no grupo[i][ord[0]];
+
+            for (j = 0; j < grafo->n_vertices; j++) {
+                if (!validos[j]) continue; // se não é um grupo válido, vai pra próxima iteração
+                if (buscaVerticeNoGrupo(grupos[j],vp) == 1) break; // se encontrar o elemento vp no grupo[j]
+            }
+
+            // unindo os dois grupos a partir do grupo do vizinho mais pŕoximo
+            // aumentar no grupo de menor índice
+            if (i < j) unirGrupos(grupos[i],grupos[j]); 
+            else unirGrupos(grupos[j], grupos[i]); 
+            
+            if (i < j) imprimirGrupo(grupos[i]); // Debug verificação
+            else imprimirGrupo(grupos[j]);
+
+            // invalidar o maior grupo
+            if (i < j) validos[j] = 0; // não é mais um grupo válido
+            else validos[i] = 0;
+
+            ordem[vp] = grupos[i][ord[0]]; // vp deve ser acessado por ord[0], que é seu vizinho mais próximo
+            
             cont++; // mais um grupo somado
         }
     }
-
+    imprimirGrupo(grupos[0]);
     liberarGrupos(grupos,grafo->n_vertices);
 } 
 
-int vizinhoMaisProximo_G (Vertice *V, int *grupo, int *ord) {
+int VMPdoGrupo (Vertice *V, int *grupo, int *ord) {
 
     int tam = tamanhoGrupo(grupo); // tamanho do grupo para verificarmos cada vértice do grupo
     int i;
-    int vp; // vp vizinho mais próximo
-    int mvp; // menor vizinho mais pŕoximo
+    int vp; // vizinho mais próximo do vertice
+    int vmp; // vizinho mais pŕoximo do grupo
     
     // Veja bem, cada elemento do meu grupo representa um VÉRTICE V[grupo[i]]
     for (i = 0; i < tam; i++) {
-        vp = vizinhoMaisProximo_V(V[grupo[i]]); // calculando o vizinho mais próximo de i (é definido que existe um mais próximo)
-
+        vp = VMPdoVertice(V[grupo[i]], grupo); // calculando o vizinho mais próximo de i (é definido que existe um mais próximo)
+        // printf("VP do Grupo[%d]: %d\n\n", i, vp);
         // Cada vp representa o vizinho mais próximo do V[grupo[i]] -> representa um vértice
         // O i é o auxiliar que eu uso para chegar em um valor possível dentro dos meus valores do grupo
 
         // Tendo o vetor de vizinhos mais próximos, precisamos saber qual é o vizinho mais próximo definitivo, o menor peso
 
         if (i == 0) {
-            mvp = vp; // se for o primeiro
+            vmp = vp; // se for o primeiro
             // o valor que eu peguei foi encontrado graças ao grupo[i], preciso guardar ele para saber a ordem
             ord[0] = grupo[i]; 
         }
         else {
-            if (V[grupo[i]].pesos[vp] < V[grupo[ord[0]]].pesos[mvp]) {
-                mvp = vp;
+            if (V[grupo[i]].pesos[vp] < V[grupo[ord[0]]].pesos[vmp]) {
+                vmp = vp;
                 // o valor que eu peguei foi encontrado graças ao V[grupo[i]], preciso guardar ele para saber a ordem
                 ord[0] = grupo[i]; 
             }
         }
     }
-    return mvp; // retorno o vizinho mais próximo entre os elementos do meu grupo
+    return vmp; // retorno o vizinho mais próximo entre os elementos do meu grupo
 }
 
-int vizinhoMaisProximo_V (Vertice V) {
-    int vp; // vizinho mais próximo
+int VMPdoVertice (Vertice V, int *grupo) {
+    int vp = -1; // vizinho mais próximo
     int i; 
     for (i = 0; i < V.grau; i++) {
-        if (V.pesos[i] > -1) {
-            if (i == 0) vp = i; // se for o primeiro valor
-            else {
-                if (V.pesos[i] < V.pesos[vp]) vp = i; // se encontrar um vizinho mais próximo
-            }
+        if (vp == -1) { // se for o primeiro valor
+            if (buscaVerticeNoGrupo(grupo,i) == FALSE) vp = i;
+        }
+        if (vp != -1) {
+            if (buscaVerticeNoGrupo(grupo,i) == FALSE && V.pesos[i] < V.pesos[vp]) vp = i; // se encontrar um vizinho mais próximo VÁLIDO
         }
     }
-    return vp;
+    return V.arestas[vp];
 }
 
 void unirGrupos(int *G1, int *G2) {
     int i, j;
     i = tamanhoGrupo(G1);
     // adicionar elementos de G2 em G1 a partir do i encontrado
-    for (j = i; G2[j] != -1; j++, i++) G1[i] = G2[j];
+    for (j = 0; G2[j] != -1; j++, i++) G1[i] = G2[j];
+}
+
+void imprimirGrupo(int *grupo) {
+    int tam = tamanhoGrupo(grupo);
+    int i;
+    printf("Grupo final = {[%d]", grupo[0]);
+    for (i = 1; i < tam; i++) {
+        printf(",[%d]", grupo[i]);
+    }
+    printf("}\n\n");
 }
 
 int tamanhoGrupo(int *grupo) {
     int tam;
     // encontrar posição do último elemento de G1
     for (tam = 0; grupo[tam] != -1; tam++);
+    // printf("\nTamanho do grupo: %d\n",tam);
     return tam;
+}
+
+int buscaVerticeNoGrupo(int *grupo, int vertice) {
+    int tam = tamanhoGrupo(grupo);
+    int i;
+    for (i = 0; i < tam; i++) {
+        if (vertice == grupo[i]) return TRUE; // se encontrar o vértice neste grupo, é porque o vértice está nesse grupo
+    }
+    return FALSE;
 }
 
 void invalidaGrupos(int **grupos, int tam) {
     int i, j;
     for (i = 0; i < tam; i++) {
-        for (j = 0; j < tam; j++) {
+        for (j = 0; j < tam+1; j++) {
             if (j == 0) grupos[i][j] = i;
             else grupos[i][j] = -1;
         }
@@ -501,8 +544,8 @@ int **alocarGrupos(int tam) {
         printf("Erro! Memoria insuficiente!\n");
         return NULL;
     }
-    for (int i = 0; i < tam; i++) {
-        grupos[i] = malloc(sizeof(int)*tam);
+    for (int i = 0; i < tam+1; i++) {
+        grupos[i] = malloc(sizeof(int)*(tam+1));
         if (!grupos[i]) {
             printf("Erro! Memoria insuficiente!\n");
             return NULL;

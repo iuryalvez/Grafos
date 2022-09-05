@@ -129,7 +129,9 @@ int main () {
             break;
         case 6:
             printf("\n\tALGORITMO DE BORUVKA\n\n");
-
+            algoritmoBoruvka(grafo,ordem,dist);
+            imprimirVisitados(ordem,grafo->n_vertices);
+            printf("\n");
             break;
         case 99:
             clear_screen();

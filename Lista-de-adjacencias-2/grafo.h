@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define TRUE 1; // booleano
-#define FALSE 0; // booleano
+#define TRUE 1 // booleano
+#define FALSE 0 // booleano
 
 // estrutura de um vértice
 struct vertice {
@@ -181,7 +181,7 @@ void algoritmoBoruvka(Grafo *grafo, int *ordem, float *dist);
  * @param pos posição do grupo
  * @return int 
  */
-int vizinhoMaisProximo_G(Vertice *V, int *grupo, int *ord);
+int VMPdoGrupo(Vertice *V, int *grupo, int *ord);
 
 /**
  * @brief função que encontra o vizinho mais próximo do vértice da posição pos
@@ -190,7 +190,7 @@ int vizinhoMaisProximo_G(Vertice *V, int *grupo, int *ord);
  * @param pos vértice que precisamos encontrar o vizinho mais próximo
  * @return int vizinho mais próximo 
  */
-int vizinhoMaisProximo_V(Vertice V);
+int VMPdoVertice(Vertice V, int *grupo);
 
 /**
  * @brief função que une o vetor G1 com o vetor G2
@@ -201,6 +201,10 @@ int vizinhoMaisProximo_V(Vertice V);
 void unirGrupos(int *G1, int *G2);
 
 int tamanhoGrupo(int *grupo);
+
+void imprimirGrupo(int *grupo);
+
+int buscaVerticeNoGrupo(int *grupo, int elem);
 
 void invalidaGrupos(int **grupos, int tam);
 
