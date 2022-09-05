@@ -9,9 +9,11 @@ int main () {
 
     Grafo *grafo = NULL; // vetor de grafos
 
-    int orig, dest, ed; // caracteristicas da aresta
-    int *vis, *ordem; // vetor de visitados (cálculo de profundidade)
-    float peso, *dist;
+    int orig, dest, ed; // características da aresta
+    int *vis; // vetor de visitados (cálculo de profundidade)
+    int *ordem; // vetor de ordem (cálculo de menor caminho) 
+    float *dist; // vetor de distâncias (cálculo do menor caminho)
+    float peso; // peso de uma aresta 
     int op, opc; // operadores
     
     do {
@@ -23,9 +25,9 @@ int main () {
             if (!grafo) {
                 printf("\n\tCRIANDO O GRAFO\n\n");
                 grafo = criarGrafo();
-                vis = alocarVisitados(grafo->n_vertices);
-                ordem = alocarVisitados(grafo->n_vertices);
-                dist = alocarDist(grafo->n_vertices);
+                vis = alocarVetor_I(grafo->n_vertices);
+                ordem = alocarVetor_I(grafo->n_vertices);
+                dist = alocarVetor_F(grafo->n_vertices);
             } else printf("\tJa existe um grafo criado!\n");
             break;
         case 2:
@@ -123,22 +125,15 @@ int main () {
                     imprimirDist(dist,grafo->n_vertices);
                     printf("\n");
                 }
-                else {
-                    printf("MENOR CAMINHO (BORUVKA)\n\n");
-                    printf("\tPosicao de inicio: ");
-                    scanf("%d", &orig);
-                    
-                    // menorCaminho(grafo, orig, ordem, dist);
-                    
-                    // printf("\n\tOrdem de visitação para chegar em outros vertices partindo de '%d'\n", orig);
-                    // imprimirVisitados(ordem,grafo->n_vertices);
-                    
-                    // printf("\n\tPeso dos caminhos para chegar em outros vertices partindo de '%d'\n", orig);
-                    // imprimirDist(dist,grafo->n_vertices);
-                    printf("\n");
-                }
             } else printf("Nao foi criado nenhum grafo!\n");
-            break;  
+            break;
+        case 6:
+            printf("\n\tALGORITMO DE BORUVKA\n\n");
+
+            break;
+        case 99:
+            clear_screen();
+            break;
         default:
             if (op != 0) printf("\nOperacao inválida!\n");
             break;

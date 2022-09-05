@@ -1,13 +1,14 @@
 #include "grafo.h"
 
 void menu() {
-    printf("1 - Criar grafo\n");
-    printf("2 - Inserir aresta\n");
-    printf("3 - Remover aresta\n");
-    printf("4 - Imprimir informacoes do grafo\n");
-    printf("5 - Busca\n");
-    // printf("99 - Destruir grafo\n");
-    printf("0 - Sair\n");
+    printf("1  ->  CRIAR GRAFO\n");
+    printf("2  ->  INSERIR ARESTA\n");
+    printf("3  ->  REMOVER ARESTA\n");
+    printf("4  ->  IMPRIMIR INFORMACOES DO GRAFO\n");
+    printf("5  ->  BUSCA\n");
+    printf("6  ->  ALGORITMO DE BORUVKA\n");
+    printf("99 ->  LIMPAR A TELA\n");
+    printf("0  ->  SAIR\n");
 }
 
 Grafo *criarGrafo() {
@@ -205,7 +206,7 @@ void imprimirVertices(Grafo *grafo) {
     printf("\n\n");
 }
 
-int *alocarVisitados(int tam) {
+int *alocarVetor_I(int tam) {
     int *visitados = malloc(tam*sizeof(int));
     if (!visitados) printf("Erro de alocacao de memoria!\n");
     return visitados;
@@ -307,7 +308,7 @@ void buscaLargura(Grafo *grafo, int src, int *vis) {
     free(ordem); // libera a ordem
 }
 
-float *alocarDist(int tam) {
+float *alocarVetor_F(int tam) {
     int i;
     float *dist = malloc(sizeof(float) * tam);
     return dist;
@@ -319,7 +320,7 @@ void menorCaminho(Grafo *grafo, int ini, int *ordem, float *dist) {
     
     cont = grafo->n_vertices;
 
-    visitados = alocarVisitados(grafo->n_vertices); // calloc
+    visitados = alocarVetor_I(grafo->n_vertices); // calloc
 
     for (i = 0; i < grafo->n_vertices; i++) { // inicializando com valores inválidos
         ordem[i] = -1; 
@@ -386,6 +387,136 @@ int procuraMenorDistancia(float *dist, int *visitados, int NV) {
         }
     }
     return menor;
+}
+
+void algoritmoBoruvka (Grafo *grafo, int *ordem, float *dist) {
+    
+    // Todos os vértices podem ser conectados e NÃO são direcionados (dígrafos), ou seja, há arestas com pesos estabelecidas entre todos eles.
+    
+    int **grupos = alocarGrupos(grafo->n_vertices); // alocando os grupos dinamicamente
+    int *validos = alocarVetor_I(grafo->n_vertices); // alocando o vetor de inteiros dinamicamente
+
+    invalidaGrupos(grupos, grafo->n_vertices); // colocando -1 em todas as posições dos grupos
+    validaVetor(validos,grafo->n_vertices); // colocando 1 em todas as posições do vetor de valores válidos
+
+    int cont = 1; // contador de quantos grupos já foram somados
+    int i; // vértice atual
+    int vp; // vizinho mais próximo
+    int *ord;
+
+    // Calcular a ordem por meio da ideia de grupos de Boruvka
+    while (cont != grafo->n_vertices) {
+        for (i = 0; i < grafo->n_vertices; i++) {
+            if (!validos[i]) continue; // se não é um grupo válido, vai pra próxima iteração
+            vp = vizinhoMaisProximo_G(grafo->vertices, grupos[i], ord); // calculando o vizinho mais próximo de i (é definido que existe um mais próximo)
+            unirGrupos(grupos[i],grupos[vp]); // unindo os dois grupos a partir do vizinho mais pŕoximo
+            validos[vp] = 0; // não é mais um grupo válido
+            ordem[vp] = ord[0]; // vp deve ser acessado por ord[0], que é seu vizinho mais próximo
+            cont++; // mais um grupo somado
+        }
+    }
+
+    liberarGrupos(grupos,grafo->n_vertices);
+} 
+
+int vizinhoMaisProximo_G (Vertice *V, int *grupo, int *ord) {
+
+    int tam = tamanhoGrupo(grupo); // tamanho do grupo para verificarmos cada vértice do grupo
+    int i;
+    int vp; // vp vizinho mais próximo
+    int mvp; // menor vizinho mais pŕoximo
+    
+    // Veja bem, cada elemento do meu grupo representa um VÉRTICE V[grupo[i]]
+    for (i = 0; i < tam; i++) {
+        vp = vizinhoMaisProximo_V(V[grupo[i]]); // calculando o vizinho mais próximo de i (é definido que existe um mais próximo)
+
+        // Cada vp representa o vizinho mais próximo do V[grupo[i]] -> representa um vértice
+        // O i é o auxiliar que eu uso para chegar em um valor possível dentro dos meus valores do grupo
+
+        // Tendo o vetor de vizinhos mais próximos, precisamos saber qual é o vizinho mais próximo definitivo, o menor peso
+
+        if (i == 0) {
+            mvp = vp; // se for o primeiro
+            // o valor que eu peguei foi encontrado graças ao grupo[i], preciso guardar ele para saber a ordem
+            ord[0] = grupo[i]; 
+        }
+        else {
+            if (V[grupo[i]].pesos[vp] < V[grupo[ord[0]]].pesos[mvp]) {
+                mvp = vp;
+                // o valor que eu peguei foi encontrado graças ao V[grupo[i]], preciso guardar ele para saber a ordem
+                ord[0] = grupo[i]; 
+            }
+        }
+    }
+    return mvp; // retorno o vizinho mais próximo entre os elementos do meu grupo
+}
+
+int vizinhoMaisProximo_V (Vertice V) {
+    int vp; // vizinho mais próximo
+    int i; 
+    for (i = 0; i < V.grau; i++) {
+        if (V.pesos[i] > -1) {
+            if (i == 0) vp = i; // se for o primeiro valor
+            else {
+                if (V.pesos[i] < V.pesos[vp]) vp = i; // se encontrar um vizinho mais próximo
+            }
+        }
+    }
+    return vp;
+}
+
+void unirGrupos(int *G1, int *G2) {
+    int i, j;
+    i = tamanhoGrupo(G1);
+    // adicionar elementos de G2 em G1 a partir do i encontrado
+    for (j = i; G2[j] != -1; j++, i++) G1[i] = G2[j];
+}
+
+int tamanhoGrupo(int *grupo) {
+    int tam;
+    // encontrar posição do último elemento de G1
+    for (tam = 0; grupo[tam] != -1; tam++);
+    return tam;
+}
+
+void invalidaGrupos(int **grupos, int tam) {
+    int i, j;
+    for (i = 0; i < tam; i++) {
+        for (j = 0; j < tam; j++) {
+            if (j == 0) grupos[i][j] = i;
+            else grupos[i][j] = -1;
+        }
+    }
+}
+
+void validaVetor(int *validos, int tam) {
+    int i;
+    for (i = 0; i < tam; i++) validos[i] = 1;
+}
+
+int **alocarGrupos(int tam) {
+    int i;
+    int **grupos = malloc(tam*sizeof(int *));
+    if (!grupos) {
+        printf("Erro! Memoria insuficiente!\n");
+        return NULL;
+    }
+    for (int i = 0; i < tam; i++) {
+        grupos[i] = malloc(sizeof(int)*tam);
+        if (!grupos[i]) {
+            printf("Erro! Memoria insuficiente!\n");
+            return NULL;
+        }
+    }
+    return grupos;
+}
+
+void liberarGrupos(int **grupos, int tam) {
+    int i;
+    for (i = 0; i < tam; i++) {
+        free(grupos[i]);
+    }
+    free(grupos);
 }
 
 void clear_screen() {

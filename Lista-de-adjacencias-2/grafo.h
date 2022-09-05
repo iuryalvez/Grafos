@@ -112,12 +112,12 @@ void buscaProfundidade(Grafo *grafo, int src, int *vis, int cont);
 void buscaLargura(Grafo *grafo, int src, int *vis);
 
 /**
- * @brief função que aloca o vetor de visitados via malloc
+ * @brief função que aloca um vetor de inteiros via malloc
  * 
  * @param tam tamanho do vetor
  * @return int* um endereço de memória de um vetor alocado
  */
-int *alocarVisitados(int tam);
+int *alocarVetor_I(int tam);
 
 /**
  * @brief função que aloca memória dinamicamente para o vetor de distâncias
@@ -125,7 +125,7 @@ int *alocarVisitados(int tam);
  * @param tam tamanho do vetor
  * @return float* vetor alocado dinamicamente
  */
-float *alocarDist(int tam);
+float *alocarVetor_F(int tam);
 
 /**
  * @brief função que imprime o vetor de visitados em formatação compreensível
@@ -170,6 +170,45 @@ void menorCaminho(Grafo *grafo, int ini, int *ordem, float *dist);
  * @return int 
  */
 int procuraMenorDistancia(float *dist, int *visitados, int NV);
+
+void algoritmoBoruvka(Grafo *grafo, int *ordem, float *dist);
+
+/**
+ * @brief função que encontra o vizinho mais próximo de um grupo de vizinhos
+ * 
+ * @param V vetor de vértices
+ * @param grupo grupo de vizinhos
+ * @param pos posição do grupo
+ * @return int 
+ */
+int vizinhoMaisProximo_G(Vertice *V, int *grupo, int *ord);
+
+/**
+ * @brief função que encontra o vizinho mais próximo do vértice da posição pos
+ * 
+ * @param V vértice referente
+ * @param pos vértice que precisamos encontrar o vizinho mais próximo
+ * @return int vizinho mais próximo 
+ */
+int vizinhoMaisProximo_V(Vertice V);
+
+/**
+ * @brief função que une o vetor G1 com o vetor G2
+ * 
+ * @param G1 vetor G1
+ * @param G2 vetor G2
+ */
+void unirGrupos(int *G1, int *G2);
+
+int tamanhoGrupo(int *grupo);
+
+void invalidaGrupos(int **grupos, int tam);
+
+void validaVetor(int *validos, int tam);
+
+int **alocarGrupos(int tam);
+
+void liberarGrupos(int **grupos, int tam);
 
 // Limpa o terminal
 void clear_screen();
