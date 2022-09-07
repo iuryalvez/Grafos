@@ -7,6 +7,7 @@ gcc grafo.c main.c -o grafo.exe
 
 int main () {
 
+    clear_screen();
     Grafo *grafo = NULL; // vetor de grafos
 
     int orig, dest, ed; // características da aresta
@@ -118,7 +119,7 @@ int main () {
                     
                     menorCaminho(grafo, orig, ordem, dist);
                     
-                    printf("\n\tOrdem de visitação para chegar em outros vertices partindo de '%d'\n", orig);
+                    printf("\n\tOrdem de visitacao para chegar em outros vertices partindo de '%d'\n", orig);
                     imprimirVisitados(ordem,grafo->n_vertices);
                     
                     printf("\n\tPeso dos caminhos para chegar em outros vertices partindo de '%d'\n", orig);
@@ -129,8 +130,9 @@ int main () {
             break;
         case 6:
             printf("\n\tALGORITMO DE BORUVKA\n\n");
-            algoritmoBoruvka(grafo,ordem,dist);
-            imprimirVisitados(ordem,grafo->n_vertices);
+            algoritmoBoruvka(grafo,ordem);
+            imprimirOrdem(ordem,grafo->n_vertices);
+            calcularDist(grafo,ordem,dist);
             printf("\n");
             break;
         case 99:

@@ -171,15 +171,22 @@ void menorCaminho(Grafo *grafo, int ini, int *ordem, float *dist);
  */
 int procuraMenorDistancia(float *dist, int *visitados, int NV);
 
-void algoritmoBoruvka(Grafo *grafo, int *ordem, float *dist);
+/**
+ * @brief função que executa o algoritmo de Boruvka em um grafo
+ * 
+ * @param grafo grafo referente
+ * @param ordem ordem dos elementos
+ * @param dist distâncias entre cada vértice 
+ */
+void algoritmoBoruvka(Grafo *grafo, int *ordem);
 
 /**
  * @brief função que encontra o vizinho mais próximo de um grupo de vizinhos
  * 
  * @param V vetor de vértices
  * @param grupo grupo de vizinhos
- * @param pos posição do grupo
- * @return int 
+ * @param ord retorna o vértice que eu preciso acessar para chegar em VMP
+ * @return int vizinho mais pŕoximo do grupo (VMP)
  */
 int VMPdoGrupo(Vertice *V, int *grupo, int *ord);
 
@@ -200,18 +207,85 @@ int VMPdoVertice(Vertice V, int *grupo);
  */
 void unirGrupos(int *G1, int *G2);
 
+/**
+ * @brief função que retorna o tamanho do grupo
+ * 
+ * @param grupo grupo marcado com -1 no final para saber o tamanho
+ * @return int tamanho do grupo
+ */
 int tamanhoGrupo(int *grupo);
 
+/**
+ * @brief função que imprime um grupo
+ * 
+ * @param grupo grupo referente
+ */
 void imprimirGrupo(int *grupo);
 
+/**
+ * @brief função que busca um vértice no grupo
+ * 
+ * @param grupo grupo referente
+ * @param elem elemento que será buscado
+ * @return int TRUE (1) se está, FALSE (0) se não
+ */
 int buscaVerticeNoGrupo(int *grupo, int elem);
 
-void invalidaGrupos(int **grupos, int tam);
+/**
+ * @brief função que inicializa os valores do grupo (-1) e i para grupo[i][0]
+ * 
+ * @param grupos matriz de grupos
+ * @param tam tamanho do número de vértices
+ */
+void inicializaGrupos(int **grupos, int tam);
 
-void validaVetor(int *validos, int tam);
+/**
+ * @brief função que inicializa o vetor de valores válidos (todos são válidos no começo)
+ * 
+ * @param validos vetor de válidos
+ * @param tam tamanho do vetor
+ */
+void inicializaValidos(int *validos, int tam);
 
+/**
+ * @brief inicializa a ordem a ser percorrida para encontrar os elementos
+ * 
+ * @param ordem vetor ordem
+ * @param tam tamanho do vetor
+ */
+void inicializaOrdem(int *ordem, int tam);
+
+/**
+ * @brief função que imprime a ordem formatada
+ * 
+ * @param ordem ordem referente
+ * @param tam tamanho do vetor
+ */
+void imprimirOrdem(int *ordem, int tam);
+
+/**
+ * @brief função que calcula o vetor de distâncias
+ * 
+ * @param grafo grafo referente
+ * @param ordem vetor da ordem
+ * @param dist vetor de distâncias
+ */
+void calcularDist(Grafo *grafo, int *ordem, float *dist);
+
+/**
+ * @brief função que aloca a matriz de grupos
+ * 
+ * @param tam tamanho do grafo (núm. de vért.)
+ * @return int** matriz alocada
+ */
 int **alocarGrupos(int tam);
 
+/**
+ * @brief função que libera a memória da matriz de grupos
+ * 
+ * @param grupos matriz de grupos
+ * @param tam tamanho (núm. de vért.)
+ */
 void liberarGrupos(int **grupos, int tam);
 
 // Limpa o terminal
