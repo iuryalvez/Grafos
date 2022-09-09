@@ -180,6 +180,7 @@ int procuraMenorDistancia(float *dist, int *visitados, int NV);
  */
 void algoritmoBoruvka(Grafo *grafo, int *ordem);
 
+
 /**
  * @brief função que encontra o vizinho mais próximo de um grupo de vizinhos
  * 
@@ -216,13 +217,6 @@ void unirGrupos(int *G1, int *G2);
 int tamanhoGrupo(int *grupo);
 
 /**
- * @brief função que imprime um grupo
- * 
- * @param grupo grupo referente
- */
-void imprimirGrupo(int *grupo);
-
-/**
  * @brief função que busca um vértice no grupo
  * 
  * @param grupo grupo referente
@@ -254,6 +248,13 @@ void inicializaValidos(int *validos, int tam);
  * @param tam tamanho do vetor
  */
 void inicializaOrdem(int *ordem, int tam);
+
+/**
+ * @brief função que imprime um grupo
+ * 
+ * @param grupo grupo referente
+ */
+void imprimirGrupo(int *grupo);
 
 /**
  * @brief função que imprime a ordem formatada

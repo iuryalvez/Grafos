@@ -129,7 +129,7 @@ int main () {
             } else printf("Nao foi criado nenhum grafo!\n");
             break;
         case 6:
-            printf("\n\tALGORITMO DE BORUVKA\n\n");
+            printf("\n\tALGORITMO DE BORUVKA");
             algoritmoBoruvka(grafo,ordem);
             imprimirOrdem(ordem,grafo->n_vertices);
             calcularDist(grafo,ordem,dist);

@@ -207,12 +207,6 @@ void imprimirVertices(Grafo *grafo) {
     printf("\n\n");
 }
 
-int *alocarVetor_I(int tam) {
-    int *visitados = malloc(tam*sizeof(int));
-    if (!visitados) printf("Erro de alocacao de memoria!\n");
-    return visitados;
-}
-
 void imprimirVisitados(int *visitados, int tam) {
     int i;
     for (i = 0; i < tam; i++) {
@@ -225,22 +219,6 @@ void imprimirVisitados(int *visitados, int tam) {
     i++;
     for (; i < tam; i++) {
         printf(" %2d", visitados[i]);
-    }
-    printf("\n");
-}
-
-void imprimirDist(float *dist, int tam) {
-    int i;
-    for (i = 0; i < tam; i++) {
-        if (i == 0) printf("\n\t Vertices -> %4d", i); 
-        else printf(" %4d", i);
-    }
-    printf("\n\t");
-    i = 0;
-    printf("Distancia -> %.2f", dist[i]);
-    i++;
-    for (; i < tam; i++) {
-        printf(" %.2f", dist[i]);
     }
     printf("\n");
 }
@@ -392,8 +370,9 @@ int procuraMenorDistancia(float *dist, int *visitados, int NV) {
 
 void algoritmoBoruvka (Grafo *grafo, int *ordem) {
     
-    // Requisito: Grafo fortemente conexo com arestas ponderadas estabelecidas entre todos eles.
-    
+    // Requisito: Grafo fortemente conexo com arestas ponderadas estabelecidas entre todos eles, não pode haver grafos que
+    // ligam a si mesmos ou grafos com duas arestas não direcionadas ou grafos com muitas arestas de mesmo peso.
+
     int **grupos = alocarGrupos(grafo->n_vertices); // alocando os grupos dinamicamente
     int *validos = alocarVetor_I(grafo->n_vertices); // alocando o vetor de inteiros dinamicamente
 
@@ -416,19 +395,20 @@ void algoritmoBoruvka (Grafo *grafo, int *ordem) {
             if (!validos[i]) continue; // se não é um grupo válido, vai pra próxima iteração
             
             printf("\tGrupo sendo estudado:\n");
-            imprimirGrupo(grupos[i]); // Debug verificação
+            imprimirGrupo(grupos[i]);
             
-            posVMP = VMPdoGrupo(grafo->vertices, grupos[i], ord); // calculando a posição do vizinho mais próximo de i (é definido que existe um mais próximo)
-            vmp = grafo->vertices[ord[0]].arestas[posVMP]; // calculando o vizinho mais próximo
+            // calculando a posição do vizinho mais próximo de i (é definido que existe um mais próximo)
+            posVMP = VMPdoGrupo(grafo->vertices, grupos[i], ord); 
+            
+            // calculando o vizinho mais próximo
+            vmp = grafo->vertices[ord[0]].arestas[posVMP]; 
 
             // vmp encontrado no Vertice = ord[0];
             for (j = 0; j < grafo->n_vertices; j++) {
                 if (!validos[j]) continue; // se não é um grupo válido, vai pra próxima iteração
-                if (buscaVerticeNoGrupo(grupos[j],vmp) == 1) break; // se encontrar o elemento vp no grupo[j]
+                if (buscaVerticeNoGrupo(grupos[j],vmp) == 1) break; // se encontrar o elemento VMP no grupo[j]
             }
             printf("\tO VMP esta no grupo '%d', entao precisamos unir os dois grupos\n\n", j);
-
-            // printf("\tEntao, o vizinho mais proximo do grupo eh o vertice %d que eh vizinho de %d, o vertice do grupo usado para encontra-lo.\n", vmp, ord[0]); 
             
             // unindo os dois grupos a partir do grupo do vizinho mais pŕoximo
             // aumentar no grupo de menor índice
@@ -460,8 +440,8 @@ void algoritmoBoruvka (Grafo *grafo, int *ordem) {
                 }
             }
             
-            printf("\tOrdem de visitacao ate agora:\n");
-            imprimirVisitados(ordem, grafo->n_vertices);
+            printf("\tOrdem de visitacao ate agora:\n\n");
+            imprimirOrdem(ordem, grafo->n_vertices);
 
             cont++; // mais um grupo somado
         }
@@ -513,8 +493,8 @@ int VMPdoGrupo (Vertice *V, int *grupo, int *ord) {
 
 int VMPdoVertice (Vertice V, int *grupo) {
     
-    // posição do vizinho mais próximo, também preciso acessar o peso dessa posição
-    // por isso não guardo o valor da posição 
+    // Posição do vizinho mais próximo, também preciso acessar o peso dessa posição
+    // Por isso não guardo o valor da posição 
     int posVMP = -1; 
     
     int i; 
@@ -543,21 +523,12 @@ void unirGrupos(int *G1, int *G2) {
     for (j = 0; G2[j] != -1; j++, i++) G1[i] = G2[j];
 }
 
-void imprimirGrupo(int *grupo) {
-    int tam = tamanhoGrupo(grupo);
-    int i;
-    printf("\t{[%d]", grupo[0]);
-    for (i = 1; i < tam; i++) {
-        printf(",[%d]", grupo[i]);
-    }
-    printf("}\n\n");
-}
 
 int tamanhoGrupo(int *grupo) {
     int tam;
     // encontrar posição do último elemento de G1
     for (tam = 0; grupo[tam] != -1; tam++);
-    // printf("\nTamanho do grupo: %d\n",tam);
+    // printf("\nTamanho do grupo: %d\n",tam); // Debug verificação
     return tam;
 }
 
@@ -569,8 +540,7 @@ int buscaVerticeNoGrupo(int *grupo, int vertice) {
             // se encontrar o vértice neste grupo, é porque o vértice está nesse grupo
             return TRUE; 
         }    
-    }
-    
+    }    
     return FALSE;
 }
 
@@ -594,6 +564,16 @@ void inicializaOrdem(int *ordem, int tam) {
     for (i = 0; i < tam; i++) ordem[i] = -1;
 }
 
+void imprimirGrupo(int *grupo) {
+    int tam = tamanhoGrupo(grupo);
+    int i;
+    printf("\t{[%d]", grupo[0]);
+    for (i = 1; i < tam; i++) {
+        printf(",[%d]", grupo[i]);
+    }
+    printf("}\n\n");
+}
+
 void imprimirOrdem(int *ordem, int tam) {
     int i;
     for (i = 0; i < tam; i++) {
@@ -613,38 +593,37 @@ void imprimirOrdem(int *ordem, int tam) {
 void calcularDist(Grafo *grafo, int *ordem, float *dist) {
     int i, j;
     float md; // menor distância
-    int opc;
-    int ini;
     
-    while (opc != 2) {
-        ini = -1;
-        opc = -1;
-        md = 0;
+    md = 0;
 
-        for (i = 0; i < grafo->n_vertices; i++) {
-            for (j = 0; j < grafo->n_vertices; j++) {
-                if (ordem[i] == grafo->vertices[i].arestas[j]) break; // encontrando a posição do vertice vizinho 'ordem[i]' em V[i]  
-            }
-            dist[i] = grafo->vertices[i].pesos[j];
+    for (i = 1; i < grafo->n_vertices; i++) {
+        for (j = 0; j < grafo->n_vertices; j++) {
+            if (ordem[i] == grafo->vertices[i].arestas[j]) break; // encontrando a posição do vertice vizinho 'ordem[i]' em V[i]  
         }
-        imprimirDist(dist,grafo->n_vertices);
-        printf("\n\tCalculando arvore geradora de custo minimo (minimum spanning tree)\n");
-        while (ini < 0 || ini > grafo->n_vertices) {
-            printf("\tVertice inicio: ");
-            scanf("%d", &ini);
-            if (ini < 0 || ini > grafo->n_vertices) printf("Valor invalido!\n");
-        }
-        printf("\tPartindo do vertice %d, a distancia total para percorrer todos os vertices, eh: ", ini);
-        dist[ini] = 0; // já estamos em ini
-        for (i = 0; i < grafo->n_vertices; i++) md += dist[i];
-        printf("%.2f\n\n", md);
-        while (opc < 1 || opc > 2) {
-            printf("\t1 - Calcular a partir de outro vertice\n");
-            printf("\t2 - Voltar\n");
-            scanf("%d", &opc);
-            if (opc < 1 || opc > 2) printf("Operacao invalida!\n");
-        }
+        dist[i] = grafo->vertices[i].pesos[j];
     }
+    
+    imprimirDist(dist,grafo->n_vertices);
+    printf("\n\tCalculando arvore geradora de custo minimo (minimum spanning tree)\n");
+    printf("\tPartindo do vertice 0, a distancia total para percorrer todos os vertices, eh: ");
+    for (i = 0; i < grafo->n_vertices; i++) md += dist[i];
+    printf("%.2f\n\n", md);
+}
+
+void imprimirDist(float *dist, int tam) {
+    int i;
+    for (i = 0; i < tam; i++) {
+        if (i == 0) printf("\n\t Vertices -> %4d", i); 
+        else printf(" %4d", i);
+    }
+    printf("\n\t");
+    i = 0;
+    printf("Distancia -> %.2f", dist[i]);
+    i++;
+    for (; i < tam; i++) {
+        printf(" %.2f", dist[i]);
+    }
+    printf("\n");
 }
 
 int **alocarGrupos(int tam) {
@@ -670,6 +649,12 @@ void liberarGrupos(int **grupos, int tam) {
         free(grupos[i]);
     }
     free(grupos);
+}
+
+int *alocarVetor_I(int tam) {
+    int *v = malloc(tam*sizeof(int));
+    if (!v) printf("Erro de alocacao de memoria!\n");
+    return v;
 }
 
 void clear_screen() {

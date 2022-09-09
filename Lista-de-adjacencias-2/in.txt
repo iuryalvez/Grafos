@@ -193,7 +193,7 @@ Entrada 5 - BORUVKA
 
 1 2
 0
-1.2
+1.7
 1
 
 5 8
@@ -241,7 +241,7 @@ Entrada 5 - BORUVKA
 1.2
 2
 
-Entrada - Exemplo do docs
+Entrada - Exemplo do docs (Boruvka)
 
 1
 6
